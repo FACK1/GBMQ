@@ -11,18 +11,15 @@ class Signup extends Component {
       }
 
     onSubmitAction = (values) => {
-      return new Promise((resolve, reject) => {
-        axios
-        .post('/signup', values)
-        .then(({data}) => {
-          if (data.success){
-            const {history} = this.props;
-            history.push('/');
-            resolve();
-          } else {
-            reject(new Error(data.error))
-          }
-        })
+      return axios
+      .post('/signup', values)
+      .then(({data}) => {
+        if (data.success){
+          const {history} = this.props;
+          history.push('/');
+        } else {
+          throw new Error(data.error)
+        }
       });
     };
 
