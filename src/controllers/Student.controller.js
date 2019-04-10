@@ -8,14 +8,34 @@ require('env2')('config.env');
 
 const { SECRET } = process.env;
 
-const create = (student) => {
+const create = student => new Promise((resolve, reject) => {
   const {
     username, password, age, gender, english, postcode,
   } = student;
-  return Student.create({
-    username, password, age, gender, english, postcode, raw: true,
-  });
-};
+
+  if (student.username.length === 0
+      || student.password.length === 0
+      || student.postcode.length === 0) {
+    reject(new Error('You have empty fields!'));
+  } else {
+    Student.create({
+      username, password, age, gender, english, postcode, raw: true,
+    })
+      .then((result) => {
+        if (result) {
+          resolve(result);
+        } else {
+          reject(new Error());
+        }
+      })
+      .catch((err) => {
+        if (err.parent.detail === `Key (username)=(${student.username}) already exists.`) {
+          return reject(new Error('Username used, try something else'));
+        }
+        return reject(new Error(err.message));
+      });
+  }
+});
 
 const findStudentByUsername = username => new Promise((resolve, reject) => {
   Student.findOne({
@@ -140,7 +160,7 @@ const checkState = (req, res) => {
 
 module.exports = {
   create,
-    findStudentById,
+  findStudentById,
   findStudentByUsername,
   checkState,
 };
